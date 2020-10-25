@@ -30,9 +30,9 @@
         data() {
             return {
                 user: {
-                    mobile: '',
-                    code: '',
-                    agree: false,
+                    mobile: '13911111111',
+                    code: '246810',
+                    agree: true,
                 },
                 loginLoading: false,//登录的loading状态，防止用户一直点登录按钮
                 formRules: {//表单验证
@@ -74,6 +74,10 @@
                             type: 'success'
                         });
                         this.loginLoading = false//关闭loading
+                        //跳转路由
+                        this.$router.push({
+                            name:'home'
+                        })
                     }).catch(err =>{
                         //失败
                         this.$message.error('登录失败，手机号或密码错误');
