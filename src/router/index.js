@@ -1,8 +1,9 @@
 import Vue from 'vue'
 import VueRouter from 'vue-router'
 import login from '@/views/login/login.vue'
-import home from '@/views/home/index.vue'
-import layout from '@/views/layout/index.vue'
+import home from '@/views/home/'
+import layout from '@/views/layout/'
+import article from '@/views/article/'
 
 
 Vue.use(VueRouter)
@@ -22,6 +23,13 @@ const routes = [
         name:'home',
         component: home
       },
+      {
+        path:'/article',
+        name:'article',
+        component: article
+      }
+      
+      
       
     ]
   },
@@ -46,4 +54,21 @@ const router = new VueRouter({
   routes
 })
 
+//导航守卫(路由拦截，所有页面得导航都会经过这里。防止用户未登录访问页面)
+//      beforeEach是全局前置守卫
+router.beforeEach((to, from, next) => {
+  //to:要去的路由
+  //from：从哪个路由来的
+  const user = JSON.parse(window.localStorage.getItem('user'))
+  if(to.path !== '/login') {//如果要去的不是/login
+    if(user){//如果有用户信息，证明登陆过
+      next()//放行
+    }else{//否则强制跳转到login页
+      next('/login')
+    }
+  }{//否则通过，进入/login
+    next()
+  }
+  //调用next就会执行用户路由，允许通过
+})
 export default router

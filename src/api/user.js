@@ -6,7 +6,7 @@ import request from '@/utils/request'
 export const userLogin = data => {
     return request({
         method: 'POST',
-        url: "mp/v1_0/authorizations",
+        url: "/mp/v1_0/authorizations",
         //设置post请求主体
         data
     })
@@ -14,12 +14,14 @@ export const userLogin = data => {
 
 //  获取用户信息
 export const getUserProfile = () => {
+    //将存在localstorage中的user数据提取，并转为JSON对象
+    // const user = JSON.parse(window.localStorage.getItem('user'))
     return request({
-        method: 'get',
-        url:'mp/v1_0/user/profile',
-        headers: {//设置请求头。用户令牌
-            Authorizations:'Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJleHAiOjE2MzUwNjY0NzksInVzZXJfaWQiOjEsInJlZnJlc2giOmZhbHNlLCJ2ZXJpZmllZCI6dHJ1ZX0.fckw7o0QhbLZEUel0tTLSe2kgyBQkU-lWUntyJ_Si-g'
-        }
+        method: 'GET',
+        url:'/mp/v1_0/user/profile'
+        // headers: {//设置请求头。用户令牌。拦截器中统一设置，这里不需要设置了
+        //     Authorizations:`Bearer ${user.token}`
+        // }
     })
 }
 //  修改用户信息

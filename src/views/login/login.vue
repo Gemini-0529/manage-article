@@ -37,12 +37,13 @@
                 loginLoading: false,//登录的loading状态，防止用户一直点登录按钮
                 formRules: {//表单验证
                     mobile: [
+                        //                                  trigger是配置触发校验的时机，blur和change
                         { required: true, message: '请输入手机号', trigger: 'blur' },
                         { pattern: /^1[3-9]\d{9}$/, message: '手机号格式不正确', trigger: 'blur'}
                     ],
                     code: [
                         { required: true, message: '请输入验证码', trigger: 'blur' },
-                        {pattern: /^\d{6}$/, message: '验证码格式不正确', trigger: 'blur'}
+                        { pattern: /^\d{6}$/, message: '验证码格式不正确', trigger: 'blur' }
                     ],
                     agree: [//自定义验证规则，验证通过 callback()，失败 callback(new Error('xxx'))
                         {validator: (rule, value, callback) => {
@@ -58,7 +59,7 @@
         },
         methods:{
             onLogin() {
-                const user = this.user
+                // const user = this.user
                 //表单验证
                 this.$refs['form'].validate( valid => {
                     if(!valid) {//如果验证失败，停止请求
@@ -67,8 +68,10 @@
                     //验证通过，提交
                     this.loginLoading = true//开启登录loading
                     //调用登录函数，传入用户数据
-                    userLogin(user).then( res => {
+                    userLogin(this.user).then( res => {
                         //成功
+                        //将接口返回的用户相关数据放到本地存储。需要转为JSON格式字符串
+                        window.localStorage.setItem('user',JSON.stringify(res.data.data))
                         this.$message({
                             message: '恭喜你，登录成功',
                             type: 'success'
