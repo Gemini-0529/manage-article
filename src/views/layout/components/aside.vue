@@ -1,8 +1,8 @@
 <template>
 <!-- 默认激活项 当前激活菜单的 / -->
-    <el-menu default-active="/"
+    <el-menu :default-active="$route.path"
     background-color="#2F4858" text-color="#fff" :collapse="isCollapse"
-    active-text-color="#ffd04b" class="menu-class" router>
+    active-text-color="#F9F871" class="menu-class" router>
         <el-menu-item index="/">
             <i class="iconfont iconhome"></i>
             <span slot="title">首页</span>
