@@ -5,15 +5,18 @@
                 <!-- 面包屑导航 -->
                 <el-breadcrumb separator-class="el-icon-arrow-right">
                     <el-breadcrumb-item :to="{ path: '/' }">首页</el-breadcrumb-item>
-                    <el-breadcrumb-item>{{this.$route.query.id ? '修改文章':'发布文章'}}</el-breadcrumb-item>
+                    <el-breadcrumb-item>{{this.$route.query.id ? '修改文章':'发布文章'}}
+                    </el-breadcrumb-item>
                 </el-breadcrumb>
             </div>
-            <el-form ref="form" :model="article" label-width="40px">
-                <el-form-item label="标题">
+            <el-form ref="publish-form" :model="article" label-width="60px" :rules="formRules">
+                <el-form-item label="标题" prop="title">
                     <el-input v-model="article.title"></el-input>
                 </el-form-item>
-                <el-form-item label="内容">
-                    <el-input type="textarea" v-model="article.content"></el-input>
+                <el-form-item label="内容" prop="content">
+                    <!-- <el-input type="textarea" v-model="article.content"></el-input> -->
+                    <el-tiptap v-model="article.content" :extensions="extensions"
+                        height="350" placeholder="请输入文章内容" lang="zh"></el-tiptap>
                 </el-form-item>
                 <el-form-item label="封面">
                     <el-radio-group v-model="article.cover.type">
@@ -23,7 +26,7 @@
                         <el-radio :label="-1">自动</el-radio>
                     </el-radio-group>
                 </el-form-item>
-                <el-form-item label="频道">
+                <el-form-item label="频道" prop="channel_id">
                     <el-select v-model="article.channel_id" placeholder="请选择频道">
                     <el-option
                         v-for="(channel,index) in channels" :key="index"
@@ -31,7 +34,8 @@
                     </el-select>
                 </el-form-item>
                 <el-form-item>
-                    <el-button type="primary" @click="onPublish(false)">{{this.$route.query.id ? '修改':'发表'}}</el-button>
+                    <el-button type="primary" @click="onPublish(false)">{{this.$route.query.id ? '修改':'发表'}}
+                    </el-button>
                     <el-button @click="onPublish(true)">存入草稿</el-button>
                 </el-form-item>
             </el-form>
@@ -40,6 +44,29 @@
 </template>
 <script>
 import { getArticleChannels,addArticle,getArticle,updateArticle } from '@/api/article'
+import {// 需要的 extensions
+  ElementTiptap,
+  Doc,
+  Text,
+  Paragraph,
+  Heading,
+  Bold,
+  Underline,
+  Italic,
+  Strike,
+  ListItem,
+  BulletList,
+  OrderedList,
+  TodoItem,
+  TodoList,
+  HorizontalRule,
+  Preview,
+  Fullscreen,
+  Image,
+  CodeBlock
+} from 'element-tiptap'
+import 'element-tiptap/lib/index.css'
+import { uploadImage } from '@/api/images'
 export default {
     name:'publishIndex',
     data() {
@@ -53,6 +80,59 @@ export default {
                     images: []
                 },
                 channel_id: null
+            },
+            extensions: [
+                new Doc(),
+                new Text(),
+                new Paragraph(),
+                new Heading({ level: 5 }),
+                new Bold({ bubble: true }), // 在气泡菜单中渲染菜单按钮
+                new Underline({ bubble: true, menubar: false }), 
+                new Italic(),//斜体
+                new Strike(),//中划线
+                new ListItem(),
+                new BulletList(),//无序列表
+                new OrderedList(),//有序列表
+                new TodoItem(),
+                new TodoList(),//待办列表
+                new Image({
+                    //默认会把用户上传的本地图片生成base64字符串和内容存储在一起
+                    //自定义图片上传
+                    uploadRequest(file) {
+                        const fd = new FormData()
+                        fd.append('image',file)
+                        //返回promise对象
+                        return uploadImage(fd).then(res => {
+                            //返回url结果
+                            return res.data.data.url
+                        })
+                    }
+                }),
+                new CodeBlock(),
+                new HorizontalRule(),//横线
+                new Preview(),
+                new Fullscreen()//全屏
+            ],
+            formRules: {
+                title: [
+                    {required: true,message: '请输入文章标题',trigger: 'blur'},
+                    { min: 5, max: 30, message: '长度在 5 到 30 个字符', trigger: 'blur' }
+                ],
+                content: [
+                    {
+                        validator(rule,value,callback) {
+                            if(value === '<p></p>'){
+                                callback(new Error('请输入文章内容'))
+                            }else {
+                                callback()
+                            }
+                        }
+                    },
+                    {required: true,message: '请输入文章内容',trigger: 'blur'}
+                ],
+                channel_id: [
+                    {required: true,message: '请选择文章频道'}
+                ]
             }
         }
     },
@@ -63,6 +143,9 @@ export default {
             this.loadArticle()
         }
     },
+    components: {
+        'el-tiptap': ElementTiptap,
+    },
     methods: {
         loadChannels() {
             getArticleChannels().then(res=>{
@@ -70,26 +153,32 @@ export default {
             })
         },
         onPublish(draft=false) {
-            const articleId = this.$route.query.id
-            if(articleId) {//如果有id则修改
-                updateArticle(articleId,this.article,draft).then(res=>{
-                    this.$message({
-                        message: '修改成功',
-                        type: 'success'
+            this.$refs['publish-form'].validate(valid =>{//表单验证
+                if(!valid){//验证失败，停止提交表单
+                    return
+                }
+                const articleId = this.$route.query.id
+                if(articleId) {//如果有id则修改
+                    updateArticle(articleId,this.article,draft).then(res=>{
+                        this.$message({
+                            message: '修改成功',
+                            type: 'success'
+                        })
+                        //修改成功后跳转到内容管理
+                        this.$router.push('/article')
                     })
-                    //修改成功后跳转到内容管理
-                    this.$router.push('/article')
-                })
-            }else {//没有id则发布
-                addArticle(this.article,draft).then(res=>{
-                    this.$message({
-                        message: '发布成功',
-                        type: 'success'
+                }else {//没有id则发布
+                    addArticle(this.article,draft).then(res=>{
+                        this.$message({
+                            message: '发布成功',
+                            type: 'success'
+                        })
+                        //发布成功后跳转到内容管理
+                        this.$router.push('/article')
                     })
-                    //发布成功后跳转到内容管理
-                    this.$router.push('/article')
-                })
-            }
+                }
+            })
+            
         },
         loadArticle() {//修改文章:加载文章内容
             getArticle(this.$route.query.id).then(res =>{

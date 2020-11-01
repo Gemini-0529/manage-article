@@ -9,7 +9,8 @@
                 </el-breadcrumb>
             </div>
             <!-- 表单 -->
-            <el-form ref="form" :model="form" label-width="40px" size="small">
+            <!-- ref="form" :model="form" -->
+            <el-form label-width="40px" size="small">
                 <el-form-item label="状态">
                     <el-radio-group v-model="status">
                         <!-- el-radio默认把label作为文本和选中之后的value值 -->
@@ -103,13 +104,9 @@
 <script>
 import { getArticles,getArticleChannels,delArticle } from '@/api/article'//引入获取文章列表api模块
 export default {
-    name:'article',
+    name:'app-article',
     data() {
         return {
-            form: {
-                region: '',//对应的频道id
-                type: []
-            },
             articles: [],//文章数据列表
             articleStatus: [
                 {status: 0,text: '草稿',type : ''},
