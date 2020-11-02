@@ -125,9 +125,7 @@
     .el-img{
         height: 100px;
         border-radius: 2px;
-    }
-    .el-img:hover{
-        box-shadow: 1px 1px 4px 0 #ccc;
+        width: 100%;
     }
     .control-btn{
         display:flex;
@@ -166,6 +164,5 @@
             opacity: .6;
         }
     }
-    
     
 </style>

@@ -6,6 +6,7 @@ import layout from '@/views/layout/'
 import article from '@/views/article/'
 import publish from '@/views/publish'
 import image from '@/views/image'
+import comment from '@/views/comment'
 
 
 Vue.use(VueRouter)
@@ -39,6 +40,11 @@ const routes = [
         path:'/image',
         name:'image',
         component: image
+      },
+      {
+        path: '/comment',
+        name: 'comment',
+        component: comment
       }
       
       
