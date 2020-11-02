@@ -8,7 +8,7 @@
                 </el-breadcrumb>
             </div>
             <div class="control-btn">
-                <el-radio-group v-model="collect" size="small" @change="loadImages">
+                <el-radio-group v-model="collect" size="small" @change="loadImages(1)">
                     <el-radio-button :label="false">全部</el-radio-button>
                     <el-radio-button :label="true">收藏</el-radio-button>
                 </el-radio-group>
@@ -19,14 +19,32 @@
                 <el-row :gutter="16" style="margin-top:20px">
                     <el-col :lg="4" :md="6" :sm="6" :xs="12" v-for="(img,index) in images"
                     :key="index"
-                    style="margin-bottom:16px">
+                    class="image-item">
                         <el-image  class="el-img"
                             :src= "img.url"
                             fit="cover">
                         </el-image>
+                        <div class="collect-img">
+                            <i :class="{
+                                'el-icon-star-on': img.is_collected,
+                                'el-icon-star-off': !img.is_collected
+                            }" @click="onCollectImage(img)"></i>
+                            <i class="el-icon-delete" @click="onDeleteImage(img)"></i>
+                        </div>
                     </el-col>
                 </el-row>
                 <!-- /图片列表 -->
+        <!-- 分页条 -->
+            <el-pagination
+                layout="prev, pager, next"
+                background
+                :total="totalCount"
+                :page-size="pageSize"
+                :current-page.sync="page"
+                @current-change="loadImages"
+                >
+                <!-- disabled为了防止网络延迟高，用户一直点击按钮进行查询 -->
+            </el-pagination>
         </el-card>
         <!-- 上传图片弹出框 -->
         <el-dialog title="上传素材" :visible.sync="dialogUploadVisible" :append-to-body="true">
@@ -47,7 +65,7 @@
     </div>
 </template>
 <script>
-    import { getImages } from '@/api/images'
+    import { getImages,collectImage,delImage } from '@/api/images'
     export default {
         name:'app-image',
         data() {
@@ -58,21 +76,47 @@
                 dialogUploadVisible: false,
                 uploadHeaders: {
                     Authorization: `Bearer ${user.token}`
-                }
+                },
+                pageSize:18,//每页几张图片
+                page:1,//页码
+                totalCount:0//总张数
             }
         },
         created() {
-            this.loadImages(false)
+            this.loadImages(1,false)
         },
         methods: {
-            loadImages(value) {
-                getImages({collect:value}).then(res=>{
-                    this.images = res.data.data.results
+            loadImages(page,collect) {
+                this.page = page//解决页码不匹配的bug
+                getImages({//获取图片列表
+                    collect:this.collect,
+                    page,
+                    per_page:this.pageSize
+                    }).then(res=>{
+                        const {results,total_count} = res.data.data
+                        this.images = results
+                        this.totalCount = total_count
                 })
             },
-            onUploadSuccess() {
+            onUploadSuccess() {//上传图片
                 this.dialogUploadVisible = false//上传成功后隐藏弹出框
-                this.loadImages(false)//上传成功后更新列表
+                this.$message({
+                    type:'success',
+                    message:'上传成功'
+                })
+                this.loadImages(this.page)//上传成功后更新列表
+            },
+            onCollectImage(img) {//收藏/取消
+                //如果已收藏，则取消收藏
+                //如果没收藏，则收藏
+                collectImage(img.id,!img.is_collected).then(res=>{
+                    img.is_collected = !img.is_collected
+                })
+            },
+            onDeleteImage(img) {//删除图片
+                delImage(img.id).then(res=>{
+                    this.loadImages(this.page)
+                })
             }
         }
     }
@@ -89,4 +133,39 @@
         display:flex;
         justify-content: space-between;
     }
+    .image-item{
+        margin-bottom:16px;
+        position: relative;
+        .collect-img{
+            height: 100px;
+            background-image: linear-gradient(to top,#000 0%,transparent 40%);
+            opacity: 0;
+            position: absolute;
+            bottom: 4px;
+            left: 8px;
+            right: 8px;
+            color: white;
+            display: flex;
+            justify-content: space-evenly;
+            font-size: 20px;
+            i{
+                margin-top: 76px;
+            };
+            i:hover{
+                cursor: pointer;
+            }
+        }
+        .collect-img i:first-child{
+            color: #F9F871;
+        }
+        .collect-img i:last-child{
+            color: rgb(206, 11, 11);
+        }
+        .collect-img:hover{
+            Transition-property:all;
+            opacity: .6;
+        }
+    }
+    
+    
 </style>
