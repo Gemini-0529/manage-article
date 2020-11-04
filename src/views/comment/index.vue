@@ -51,13 +51,12 @@
                 @size-change="handleSizeChange"
                 @current-change="handleCurrentChange"
                 :current-page.sync="page"
-                :page-sizes="[20, 30]"
+                :page-sizes="[10,20, 30]"
                 :page-size.sync="pageSize"
                 layout="total, sizes, prev, pager, next, jumper"
                 :total="total_count"
                 background
-                >
-            </el-pagination>
+                />
         </el-card>
         
     </div>
@@ -71,7 +70,7 @@
                 commentList: [],
                 loading: true,
                 total_count: 0,
-                pageSize:20,
+                pageSize:10,
                 page: 1//当前激活的页码
             }
         },
@@ -88,13 +87,12 @@
             },
             loadArticles(page=1) {
                 this.loading = true//开启loading
-                this.page = page
+                this.page = page//分页组件激活的页码和请求数据的页码保持一致
                 getArticles({
                     response_type: 'comment',
                     page,
                     per_page:this.pageSize
                 }).then(res=>{
-                    console.log(res)
                     const { results,total_count } = res.data.data
                     results.forEach(article => {//遍历请求回来的数据
                     //给每一项都添加一个statusDisabled属性，控制每条数据的操作状态，

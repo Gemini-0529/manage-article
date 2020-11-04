@@ -23,7 +23,9 @@
             <i class="el-icon-arrow-down el-icon--right"></i>
           </div>
           <el-dropdown-menu slot="dropdown">
-            <el-dropdown-item>个人中心</el-dropdown-item>
+            <el-dropdown-item>
+              <router-link to="/setting" style="text-decoration:none">个人中心</router-link>
+              </el-dropdown-item>
             <!-- 组件默认不识别原生事件，除非内部做了处理 -->
             <!--                  原生事件修饰符 -->
             <el-dropdown-item @click.native="logOut">退出</el-dropdown-item>
@@ -38,8 +40,9 @@
   </el-container>
 </template>
 <script>
-import AppAside from "./components/aside";
-import { getUserProfile } from "@/api/user";
+import AppAside from "./components/aside"
+import { getUserProfile } from "@/api/user"
+import globalBus from "@/utils/global-bus"
 
 export default {
   name: "LayoutIndex",
@@ -51,12 +54,19 @@ export default {
   },
   created() {
     this.loadUserProfile()
+    //注册接收setting的数据
+    globalBus.$on('update-user',val=>{
+      this.user.name = val.name
+      this.user.photo = val.photo
+    })
+    //注册接收setting的数据
   },
   methods: {
     loadUserProfile() {
       getUserProfile().then((res) => {
         //发送请求
         this.user = res.data.data;
+        
       });
     },
     logOut() {

@@ -25,6 +25,12 @@
                         <el-radio :label="0">无图</el-radio>
                         <el-radio :label="-1">自动</el-radio>
                     </el-radio-group>
+                    <template v-if="article.cover.type > 0">
+                        <!-- type为1或3时，遍历显示 -->
+                        <article-cover v-for="cover in article.cover.type"
+                        :key="cover"/>
+                    </template>
+                    
                 </el-form-item>
                 <el-form-item label="频道" prop="channel_id">
                     <el-select v-model="article.channel_id" placeholder="请选择频道">
@@ -67,6 +73,7 @@ import {// 需要的 extensions
 } from 'element-tiptap'
 import 'element-tiptap/lib/index.css'
 import { uploadImage } from '@/api/images'
+import ArticleCover from './components/article-cover'
 export default {
     name:'publishIndex',
     data() {
@@ -76,7 +83,7 @@ export default {
                 title:'',//文章标题
                 content:'',//文章内容
                 cover: {
-                    type:0,//封面类型  -1：自动  0：无图  1：1张  3：3张
+                    type:1,//封面类型  -1：自动  0：无图  1：1张  3：3张
                     images: []
                 },
                 channel_id: null
@@ -99,6 +106,7 @@ export default {
                     //默认会把用户上传的本地图片生成base64字符串和内容存储在一起
                     //自定义图片上传
                     uploadRequest(file) {
+                        console.log(file)
                         const fd = new FormData()
                         fd.append('image',file)
                         //返回promise对象
@@ -145,6 +153,7 @@ export default {
     },
     components: {
         'el-tiptap': ElementTiptap,
+        ArticleCover
     },
     methods: {
         loadChannels() {
