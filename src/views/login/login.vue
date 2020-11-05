@@ -13,7 +13,8 @@
                 <el-input v-model="user.mobile" placeholder="请输入手机号"></el-input>
             </el-form-item>
             <el-form-item prop="code">
-                <el-input v-model="user.code" placeholder="请输入验证码"></el-input>
+                <el-input v-model="user.code" placeholder="请输入验证码" style="width:230px;margin-right:6px"></el-input>
+                <el-button>发送验证码</el-button>
             </el-form-item>
             <el-form-item prop="agree">
                 <el-checkbox v-model="user.agree">我已阅读并同意用户协议和隐私条款</el-checkbox>

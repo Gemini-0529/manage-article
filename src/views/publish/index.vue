@@ -27,9 +27,23 @@
                     </el-radio-group>
                     <template v-if="article.cover.type > 0">
                         <!-- type为1或3时，遍历显示 -->
-                        <article-cover v-for="cover in article.cover.type"
-                        :key="cover"/>
+                        <article-cover v-for="(cover,index) in article.cover.type"
+                            :key="cover"
+                            v-model="article.cover.images[index]"/>
+                            <!-- v-model=== :value="article.cover.images[index]"+
+                                            @input="article.cover.images[index]" -->
                     </template>
+                    <!-- <template v-if="article.cover.type > 0">
+                         type为1或3时，遍历显示 
+                        <article-cover v-for="(cover,index) in article.cover.type"
+                        :key="index" :cover-image="article.cover.images[index]"
+                         @update-cover="onUpdateCover(index,$event)"/>
+                         监听子组件传来的数据           索引 ，对应url
+                            选择三图时，有了索引参数，所以之前的url变成了索引
+                            当你给事件处理函数传递了自定义参数以后，无法得到原本的数据参数
+                            需要手动指定$event，他代表原来的数据参数
+                            :cover-image="article.cover.images[index]"   父组件将images数组传给子组件
+                    </template> -->
                     
                 </el-form-item>
                 <el-form-item label="频道" prop="channel_id">
@@ -193,6 +207,11 @@ export default {
             getArticle(this.$route.query.id).then(res =>{
                 this.article = res.data.data
             })
+        },
+        onUpdateCover(index,url) {//接收子组件传来的封面图
+            //将article-cover-images的索引分别添加子组件传来的图片url
+            this.article.cover.images[index] = url
+            
         }
     }
 }
