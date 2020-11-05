@@ -3,6 +3,9 @@
  */
 import axios from 'axios'
 import JSONbig from 'json-bigint'
+import router from '@/router'
+
+import Message from 'element-ui'
 
 //创建一个axios实例
 //配置，将来发请求直接写参数，会自动拼接baseurl地址
@@ -44,6 +47,22 @@ request.interceptors.request.use(
     function (error) {
       return Promise.reject(error)
     }
-  )
+)
+
+//响应拦截器Add a response interceptor
+request.interceptors.response.use(function (response) {
+  //所有响应码为2xx的响应都会进入这里
+  return response;
+}, function (error) {
+  // 任何超出2xx的响应码都会进入这里
+  if(error.response && error.response.status === 401) {
+    //清除本地存储中的用户恶意添加的user信息
+    window.localStorage.removeItem('user')
+    router.push('/login')//跳转到登录页
+  }else if(error.response.status >= 500){
+    Message.error('服务器端异常')
+  }
+  return Promise.reject(error);
+});
 
 export default request

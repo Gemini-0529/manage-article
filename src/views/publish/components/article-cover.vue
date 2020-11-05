@@ -88,18 +88,17 @@ import  imageList  from '@/views/image/components/image-list'
     }
 </script>
 <style lang="less" scoped>
-.cover-container{
-    display: flex;
-    justify-content: flex-start;
+
     .cover-wrap{
         width: 120px;
         height: 120px;
         border: 1px dashed #409EFF;
         border-radius: 4px;
+        float: left;
         .cover-image{
-            
+            height: 120px;
             max-width: 100%;
         }
     }
-}
+
 </style>
